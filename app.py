@@ -15,46 +15,123 @@ HTML_TEMPLATE = """
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Titanic EDA Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1,h2 { color: #2c3e50; }
-    .cards { display: flex; flex-wrap: wrap; gap: 12px; }
-    .card { border: 1px solid #dfe6e9; border-radius: 8px; padding: 16px; width: calc(50% - 16px); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    a { color: #0984e3; text-decoration: none; }
-    img { max-width: 100%; border-radius: 4px; }
-    pre { background: #f5f6fa; padding: 12px; border-radius: 6px; overflow: auto; }
+    :root {
+      --bg: #f3f6fb;
+      --surface: #ffffff;
+      --surface-strong: #e2e8f0;
+      --text: #1f2937;
+      --muted: #475569;
+      --primary: #2563eb;
+      --accent: #7c3aed;
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+    a { color: var(--primary); text-decoration: none; }
+    h1, h2, h3 { margin: 0; }
+    header { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 42px 24px; text-align: center; }
+    header h1 { font-size: clamp(2rem, 4vw, 3.8rem); letter-spacing: -0.04em; }
+    header p { margin-top: 16px; max-width: 760px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.88); line-height: 1.8; }
+    .container { max-width: 1180px; margin: -48px auto 40px; padding: 0 24px; }
+    .panel { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 24px; margin-top: 24px; }
+    .panel-card, .stats-card, .card { background: var(--surface); border-radius: 28px; padding: 28px; box-shadow: var(--shadow); }
+    .panel-card h2 { font-size: 1.9rem; margin-bottom: 18px; }
+    .panel-card p { color: var(--muted); line-height: 1.8; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; padding: 14px 22px; border-radius: 999px; font-weight: 700; transition: transform .2s ease, box-shadow .2s ease; }
+    .button.primary { background: var(--primary); color: white; box-shadow: 0 16px 36px rgba(37, 99, 235, 0.24); }
+    .button.secondary { background: #eff6ff; color: var(--primary); }
+    .button:hover { transform: translateY(-2px); }
+    .stats-grid { display: grid; gap: 18px; }
+    .stat { padding: 22px; border-radius: 24px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px; }
+    .stat strong { font-size: 1.4rem; color: var(--text); }
+    .stat span { color: var(--muted); line-height: 1.6; }
+    .cards { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 32px; }
+    .card h3 { font-size: 1.1rem; margin-bottom: 14px; }
+    .card img { width: 100%; border-radius: 20px; display: block; }
+    .section { margin-top: 32px; }
+    .section h2 { margin-bottom: 18px; font-size: 1.85rem; }
+    .notice { background: #eef2ff; border-left: 4px solid #6366f1; padding: 18px 22px; border-radius: 20px; color: var(--text); margin-top: 24px; }
+    pre { margin: 0; background: #0f172a; color: white; padding: 20px; border-radius: 20px; overflow-x: auto; font-size: 0.95rem; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { color: var(--muted); font-weight: 700; }
+    td { color: var(--text); }
+    .grid-wide { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 900px) { .panel, .grid-wide { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { header { padding: 32px 18px; } .container { padding: 0 16px; } }
   </style>
 </head>
 <body>
-  <h1>Titanic EDA Dashboard</h1>
-  <p>This dashboard presents the cleaned Titanic dataset stored in MongoDB and the generated visualizations.</p>
-  <h2>Run the EDA pipeline</h2>
-  <p>Execute <code>python eda.py</code> first to load the Titanic data, clean it, save it into MongoDB, and generate the plots.</p>
-
-  <h2>MongoDB connection</h2>
-  <p>Using <code>{{ mongo_uri }}</code> with database <code>{{ db_name }}</code> and collection <code>{{ collection_name }}</code>.</p>
-
-  <h2>Available Visualizations</h2>
-  <div class="cards">
-    {% for title, filename in plots %}
-    <div class="card">
-      <h3>{{ title }}</h3>
-      <a href="/visualizations/{{ filename }}" target="_blank">
-        <img src="/visualizations/{{ filename }}" alt="{{ title }}">
-      </a>
+  <header>
+    <h1>Titanic EDA Dashboard</h1>
+    <p>Explore cleaned Titanic data, visualizations, and MongoDB results from a Flask backend.</p>
+  </header>
+  <div class="container">
+    <div class="panel">
+      <div class="panel-card">
+        <h2>App summary</h2>
+        <p>Run <code>python eda.py</code> to clean the Titanic dataset, save it into MongoDB, and generate five key visualizations. Then launch the dashboard with <code>python app.py</code> for local exploration.</p>
+        <div class="buttons">
+          <a class="button primary" href="/api/data">View JSON data</a>
+          <a class="button secondary" href="/api/stats">View stats</a>
+        </div>
+        <div class="notice">
+          MongoDB connection: <strong>{{ mongo_uri }}</strong><br>
+          Database: <strong>{{ db_name }}</strong><br>
+          Collection: <strong>{{ collection_name }}</strong>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-grid">
+          <div class="stat"><strong>5 Visualizations</strong><span>Survival, gender, age, fare class, and correlation heatmap.</span></div>
+          <div class="stat"><strong>891 Records</strong><span>Classic Titanic passenger dataset cleaned and stored.</span></div>
+          <div class="stat"><strong>MongoDB Ready</strong><span>Cleaned dataset is persisted for API access and future queries.</span></div>
+        </div>
+      </div>
     </div>
-    {% endfor %}
+
+    <section class="section">
+      <div class="grid-wide">
+        <div class="card">
+          <h3>Available API Endpoints</h3>
+          <table>
+            <thead>
+              <tr><th>Endpoint</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><a href="/api/data">/api/data</a></td><td>Cleaned Titanic data in JSON format</td></tr>
+              <tr><td><a href="/api/stats">/api/stats</a></td><td>Summary statistics for cleaned data</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Quick start</h3>
+          <pre>pip install -r requirements.txt
+python eda.py
+python app.py
+</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Visualizations</h2>
+      <div class="cards">
+        {% for title, filename in plots %}
+        <div class="card">
+          <h3>{{ title }}</h3>
+          <a href="/visualizations/{{ filename }}" target="_blank">
+            <img src="/visualizations/{{ filename }}" alt="{{ title }}">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
   </div>
-
-  <h2>Available API Endpoints</h2>
-  <ul>
-    <li><a href="/api/data">/api/data</a> - Cleaned Titanic dataset from MongoDB as JSON</li>
-    <li><a href="/api/stats">/api/stats</a> - Summary statistics from the cleaned dataset</li>
-  </ul>
-
-  <h2>Summary Statistics</h2>
-  <pre>{{ stats }}</pre>
 </body>
 </html>
 """
