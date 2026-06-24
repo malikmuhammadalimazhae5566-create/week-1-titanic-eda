@@ -1,4 +1,4 @@
-# Exploratory Data Analysis (EDA) Report: Titanic Dataset
+ve # Exploratory Data Analysis (EDA) Report: Titanic Dataset
 
 ## 1. Introduction
 This report documents the Exploratory Data Analysis (EDA) performed on the widely known **Titanic dataset**. The objective is to understand the data distribution, handle missing values, and extract meaningful insights regarding passenger survival.

@@ -19,110 +19,95 @@ HTML_TEMPLATE = """
   <title>Titanic EDA Dashboard</title>
   <style>
     :root {
-      --bg: #f3f6fb;
-      --surface: #ffffff;
-      --surface-strong: #e2e8f0;
-      --text: #1f2937;
-      --muted: #475569;
-      --primary: #2563eb;
-      --accent: #7c3aed;
-      --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+      --bg: #020617;
+      --surface: rgba(18, 23, 43, 0.96);
+      --surface-soft: rgba(15, 23, 42, 0.78);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-soft: rgba(56, 189, 248, 0.14);
+      --accent: #a855f7;
+      --shadow: 0 32px 80px rgba(15, 23, 42, 0.35);
+      --border: rgba(148, 163, 184, 0.18);
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+    body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 32%), linear-gradient(180deg, #020617 0%, #070f1f 100%); color: var(--text); }
     a { color: var(--primary); text-decoration: none; }
     h1, h2, h3 { margin: 0; }
-    header { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 42px 24px; text-align: center; }
-    header h1 { font-size: clamp(2rem, 4vw, 3.8rem); letter-spacing: -0.04em; }
-    header p { margin-top: 16px; max-width: 760px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.88); line-height: 1.8; }
-    .container { max-width: 1180px; margin: -48px auto 40px; padding: 0 24px; }
-    .panel { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 24px; margin-top: 24px; }
-    .panel-card, .stats-card, .card { background: var(--surface); border-radius: 28px; padding: 28px; box-shadow: var(--shadow); }
-    .panel-card h2 { font-size: 1.9rem; margin-bottom: 18px; }
+    header { padding: 42px 22px 26px; text-align: center; }
+    header h1 { font-size: clamp(2.8rem, 5vw, 4.8rem); letter-spacing: -0.05em; }
+    header p { margin: 18px auto 0; max-width: 760px; color: var(--muted); font-size: 1.05rem; line-height: 1.8; }
+    .container { max-width: 1180px; margin: 0 auto 40px; padding: 0 22px; }
+    .panel { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: start; margin-top: 24px; }
+    .panel-card, .stats-card, .card, .chart-card, .deployment-card, .notice { background: var(--surface); border: 1px solid var(--border); border-radius: 32px; box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .panel-card, .chart-card, .deployment-card { padding: 32px; }
+    .panel-card h2 { font-size: 2rem; margin-bottom: 18px; }
     .panel-card p { color: var(--muted); line-height: 1.8; }
-    .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
-    .button { display: inline-flex; align-items: center; justify-content: center; padding: 14px 22px; border-radius: 999px; font-weight: 700; transition: transform .2s ease, box-shadow .2s ease; }
-    .button.primary { background: var(--primary); color: white; box-shadow: 0 16px 36px rgba(37, 99, 235, 0.24); }
-    .button.secondary { background: #eff6ff; color: var(--primary); }
+    .button-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-width: 160px; padding: 16px 24px; border-radius: 999px; font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .button.primary { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; box-shadow: 0 18px 40px rgba(56, 189, 248, 0.24); }
+    .button.secondary { background: rgba(255,255,255,0.08); color: var(--text); }
     .button:hover { transform: translateY(-2px); }
     .stats-grid { display: grid; gap: 18px; }
-    .stat { padding: 22px; border-radius: 24px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px; }
-    .stat strong { font-size: 1.4rem; color: var(--text); }
-    .stat span { color: var(--muted); line-height: 1.6; }
-    .cards { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 32px; }
-    .card h3 { font-size: 1.1rem; margin-bottom: 14px; }
-    .card img { width: 100%; border-radius: 20px; display: block; }
-    .section { margin-top: 32px; }
-    .section h2 { margin-bottom: 18px; font-size: 1.85rem; }
-    .notice { background: #eef2ff; border-left: 4px solid #6366f1; padding: 18px 22px; border-radius: 20px; color: var(--text); margin-top: 24px; }
-    pre { margin: 0; background: #0f172a; color: white; padding: 20px; border-radius: 20px; overflow-x: auto; font-size: 0.95rem; line-height: 1.6; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    th { color: var(--muted); font-weight: 700; }
-    td { color: var(--text); }
-    .grid-wide { display: grid; gap: 24px; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 900px) { .panel, .grid-wide { grid-template-columns: 1fr; } }
-    @media (max-width: 620px) { header { padding: 32px 18px; } .container { padding: 0 16px; } }
+    .stat { padding: 24px; border-radius: 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .stat strong { font-size: 1.5rem; display: block; margin-bottom: 10px; }
+    .stat span { color: var(--muted); line-height: 1.8; }
+    .notice { padding: 24px; margin-top: 32px; border-left: 4px solid rgba(56, 189, 248, 0.9); }
+    .notice strong { color: white; }
+    .section { margin-top: 38px; }
+    .section h2 { font-size: 2rem; margin-bottom: 22px; }
+    .grid { display: grid; gap: 24px; }
+    .chart-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .chart-card { padding: 28px; }
+    .chart-card h3 { margin-bottom: 18px; font-size: 1.2rem; }
+    .chart-card img { width: 100%; border-radius: 24px; display: block; }
+    .deployment-card p { color: var(--muted); line-height: 1.8; margin: 0; }
+    .footer { text-align: center; margin-top: 48px; color: var(--muted); font-size: 0.95rem; }
+    .footer a { color: var(--primary); }
+    @media (max-width: 980px) { .panel { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .button-row { flex-direction: column; width: 100%; } }
   </style>
 </head>
 <body>
   <header>
     <h1>Titanic EDA Dashboard</h1>
-    <p>Explore cleaned Titanic data, visualizations, and MongoDB results from a Flask backend.</p>
+    <p>Visualize Titanic data with a polished dashboard, MongoDB support, and intuitive charts.</p>
   </header>
   <div class="container">
     <div class="panel">
       <div class="panel-card">
-        <h2>App summary</h2>
-        <p>Run <code>python eda.py</code> to clean the Titanic dataset, save it into MongoDB, and generate five key visualizations. Then launch the dashboard with <code>python app.py</code> for local exploration.</p>
-        <div class="buttons">
+        <h2>Project summary</h2>
+        <p>Run <code>python eda.py</code> to clean Titanic passenger data, generate meaningful plots, and save the cleaned dataset to MongoDB. Start the app with <code>python app.py</code> for local exploration.</p>
+        <div class="button-row">
           <a class="button primary" href="/api/data">View JSON data</a>
           <a class="button secondary" href="/api/stats">View stats</a>
         </div>
         <div class="notice">
-          MongoDB connection: <strong>{{ mongo_uri }}</strong><br>
+          MongoDB URI: <strong>{{ mongo_uri }}</strong><br>
           Database: <strong>{{ db_name }}</strong><br>
           Collection: <strong>{{ collection_name }}</strong>
         </div>
       </div>
       <div class="stats-card">
         <div class="stats-grid">
-          <div class="stat"><strong>5 Visualizations</strong><span>Survival, gender, age, fare class, and correlation heatmap.</span></div>
-          <div class="stat"><strong>891 Records</strong><span>Classic Titanic passenger dataset cleaned and stored.</span></div>
-          <div class="stat"><strong>MongoDB Ready</strong><span>Cleaned dataset is persisted for API access and future queries.</span></div>
+          <div class="stat"><strong>5 visualizations</strong><span>Survival, gender, age distribution, fare class, and correlation analysis.</span></div>
+          <div class="stat"><strong>891 records</strong><span>Classic Titanic dataset cleaned and stored.</span></div>
+          <div class="stat"><strong>MongoDB ready</strong><span>Cleaned data is persisted and available for API access.</span></div>
         </div>
       </div>
     </div>
 
     <section class="section">
-      <div class="grid-wide">
-        <div class="card">
-          <h3>Available API Endpoints</h3>
-          <table>
-            <thead>
-              <tr><th>Endpoint</th><th>Description</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><a href="/api/data">/api/data</a></td><td>Cleaned Titanic data in JSON format</td></tr>
-              <tr><td><a href="/api/stats">/api/stats</a></td><td>Summary statistics for cleaned data</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card">
-          <h3>Quick start</h3>
-          <pre>pip install -r requirements.txt
-python eda.py
-python app.py
-</pre>
-        </div>
+      <div class="notice">
+        <strong>Note:</strong> This dashboard is styled for a premium experience. The Flask backend is available locally at <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a> once the app and MongoDB are running.
       </div>
     </section>
 
     <section class="section">
       <h2>Visualizations</h2>
-      <div class="cards">
+      <div class="chart-grid">
         {% for title, filename in plots %}
-        <div class="card">
+        <div class="chart-card">
           <h3>{{ title }}</h3>
           <a href="/visualizations/{{ filename }}" target="_blank">
             <img src="/visualizations/{{ filename }}" alt="{{ title }}">
@@ -131,6 +116,17 @@ python app.py
         {% endfor %}
       </div>
     </section>
+
+    <section class="section">
+      <div class="deployment-card">
+        <h2>Ready for deploy</h2>
+        <p>This application is ready for deployment on Render, Railway, or Fly.io. The static preview is ideal for GitHub Pages while the Flask app provides the local dynamic backend.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Repo: <a href="https://github.com/malikmuhammadalimazhae5566-create/week-1-titanic-eda" target="_blank">week-1-titanic-eda</a></p>
+    </footer>
   </div>
 </body>
 </html>
